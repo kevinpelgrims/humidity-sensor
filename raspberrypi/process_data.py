@@ -40,8 +40,6 @@ def read_serial_data(serial_port: str) -> SensorData:
                 json_data = json.loads(data)
                 sensor_data = SensorData.from_json(json_data)
 
-                print(f"Received data: {sensor_data}")
-
                 return sensor_data
             else:
                 print(f"No data available yet. Will retry in {read_backoff_in_seconds} seconds...")
@@ -57,14 +55,20 @@ def read_serial_data(serial_port: str) -> SensorData:
         serial_connection.close()
 
 
+def run_scheduled_tasks(serial_port: str):
+    sensor_data = read_serial_data(serial_port)
+    print(f"Received data: {sensor_data}")
+
+
 def main(serial_port='ttyACM0'):
     # Read the data every 15 minutes
-    schedule.every(15).minutes.do(read_serial_data, serial_port)
+    schedule.every(15).minutes.do(run_scheduled_tasks, serial_port)
 
     print(f"Starting serial data reader on port /dev/{serial_port}. Press Ctrl+C to exit.")
 
     try:
-        read_serial_data(serial_port)
+        # Run the scheduled task immediately, so we don't need to wait 15 minutes for the first execution
+        schedule.run_all()
         while True:
             schedule.run_pending()
             time.sleep(1)
