@@ -9,18 +9,20 @@ import serial
 
 @dataclass
 class SensorData:
+    timestamp: datetime
     temperature: float
     humidity: float
 
     @classmethod
     def from_json(cls, json_data):
         return cls(
+            timestamp=datetime.now(),
             temperature=json_data['temperature'],
             humidity=json_data['humidity']
         )
 
     def __str__(self):
-        return f"Temperature: {self.temperature}°C, Humidity: {self.humidity}%"
+        return f"Timestamp: {self.timestamp}, Temperature: {self.temperature}°C, Humidity: {self.humidity}%"
 
 
 def read_serial_data(serial_port: str) -> SensorData:
@@ -38,11 +40,11 @@ def read_serial_data(serial_port: str) -> SensorData:
                 json_data = json.loads(data)
                 sensor_data = SensorData.from_json(json_data)
 
-                print(f"{datetime.now()} Received data: {sensor_data}")
+                print(f"Received data: {sensor_data}")
 
                 return sensor_data
             else:
-                print(f"{datetime.now()} No data available yet. Will retry in {read_backoff_in_seconds} seconds...")
+                print(f"No data available yet. Will retry in {read_backoff_in_seconds} seconds...")
                 time.sleep(read_backoff_in_seconds)
 
         print("Error: No data received after 3 attempts")
