@@ -68,16 +68,33 @@ def read_serial_data(serial_port: str) -> SensorData:
         serial_connection.close()
 
 
-def run_scheduled_tasks(serial_port: str, database):
+def run_scheduled_task(serial_port: str, database):
     sensor_data = read_serial_data(serial_port)
-    save_to_firestore(database, sensor_data)
+
+    if sensor_data:
+        save_to_firestore(database, sensor_data)
+    else:
+        print("Task failed. Rescheduling to run again in 1 minute.")
+        schedule.every(1).minutes.do(retry_scheduled_task, serial_port, database).tag("retry")
+
+
+def retry_scheduled_task(serial_port: str, database):
+    sensor_data = read_serial_data(serial_port)
+
+    if sensor_data:
+        print("Retry successful. Resuming normal schedule.")
+        schedule.clear("retry")
+
+        save_to_firestore(database, sensor_data)
+    else:
+        print("Retry failed. Will try again in 1 minute.")
 
 
 def main(serial_port: str, firebase_config: str):
     database = initialize_firebase_database(firebase_config)
 
     # Read the data every 15 minutes
-    schedule.every(15).minutes.do(run_scheduled_tasks, serial_port, database)
+    schedule.every(15).minutes.do(run_scheduled_task, serial_port, database)
 
     print(f"Starting serial data reader on port /dev/{serial_port}. Press Ctrl+C to exit.")
 
