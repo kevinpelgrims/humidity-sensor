@@ -58,7 +58,24 @@ export const sendHumidityAlert = onDocumentCreated(
     }
 
     if (humidity > humidityThreshold) {
-      logger.log("Oh no! Humidity threshold passed!");
+      const recipients = ["<RECIPIENT_EMAIL>"];
+
+      if (recipients.length > 0) {
+        await getFirestore().collection("mail").add(
+          {
+            to: recipients,
+            message: {
+              subject: "Humidity threshold exceeded",
+              html: `
+              The current humidity measurement is ${humidity}%.
+              This is above the threshold of ${humidityThreshold}%.
+            `,
+            },
+          }
+        );
+      } else {
+        logger.warn("No email recipients found. Humidity alert will not be sent.");
+      }
     }
   }
 );

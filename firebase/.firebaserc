@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "sensor-data-vg84"
-  }
+  },
+  "targets": {},
+  "etags": {
+    "sensor-data-vg84": {
+      "extensionInstances": {
+        "firestore-send-email": "cb01c94473f162e064087867b91462242fa7423a7d5e00d12e7625f983702ab0"
+      }
+    }
+  },
+  "dataconnectEmulatorConfig": {}
 }
