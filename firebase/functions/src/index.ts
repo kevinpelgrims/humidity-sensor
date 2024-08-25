@@ -1,8 +1,8 @@
-import {onDocumentCreated} from "firebase-functions/v2/firestore";
-import * as logger from "firebase-functions/logger";
 import {initializeApp} from "firebase-admin/app";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
-import {getRemoteConfig} from "firebase-admin/remote-config";
+import * as logger from "firebase-functions/logger";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import {getHumidityThreshold} from "./humidity_helper.js";
 import {getPrecipitationSeverity, getWeatherDescription, WeatherApiResponse, WeatherRecord} from "./weather_helper.js";
 
 initializeApp();
@@ -36,6 +36,29 @@ export const fetchWeatherConditions = onDocumentCreated(
       await database.collection("weather_records").add(weatherRecord);
     } catch (error) {
       logger.error(error);
+    }
+  }
+);
+
+export const sendHumidityAlert = onDocumentCreated(
+  "sensor_readings/{docId}",
+  async (event) => {
+    const sensorData = event.data?.data();
+
+    if (!sensorData) {
+      logger.log("Could not retrieve sensor data to prepare humidity alert.");
+    }
+
+    const humidity = sensorData?.humidity;
+    const humidityThresholdRemoteConfig = await getHumidityThreshold();
+    const humidityThreshold = humidityThresholdRemoteConfig || 70.0;
+
+    if (humidityThresholdRemoteConfig === null) {
+      logger.warn("Could not find humidity threshold. Using default value.");
+    }
+
+    if (humidity > humidityThreshold) {
+      logger.log("Oh no! Humidity threshold passed!");
     }
   }
 );
