@@ -18,3 +18,17 @@
 ### Sending email alerts with Firebase Functions
 
 * [Trigger Email extension usage](https://invertase.io/blog/send-email-extension)
+
+The email addresses for sending alerts are retrieved from Firestore in a collection named `notification_recipients` in
+a document named `email` with an array of email addresses named `recipients`:
+
+```json
+{
+  "email": {
+    "recipients": [
+      "test-1@email.com",
+      "test-2@email.com"
+    ]
+  }
+}
+```
