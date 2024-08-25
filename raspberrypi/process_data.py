@@ -1,13 +1,55 @@
 import json
+import logging
 import sys
 import time
 from dataclasses import dataclass, asdict
 from datetime import datetime
+from pathlib import Path
 
 import firebase_admin
 import schedule
 import serial
 from firebase_admin import credentials, firestore
+
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class Logger(metaclass=Singleton):
+    def __init__(self, log_directory: str = "logs", log_file_name: str | None = None):
+        if log_file_name is None:
+            log_file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+        self.logger = logging.getLogger()
+
+        self.logger.setLevel(logging.DEBUG)
+        logger_formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+        logger_file_handler = logging.FileHandler(f"{log_directory}/{log_file_name}.log")
+        logger_file_handler.setLevel(logging.DEBUG)
+        logger_file_handler.setFormatter(logger_formatter)
+
+        self.logger.addHandler(logger_file_handler)
+
+    def debug(self, message):
+        self.logger.debug(message)
+
+    def info(self, message):
+        self.logger.info(message)
+
+    def warning(self, message):
+        self.logger.warning(message)
+
+    def error(self, message):
+        self.logger.error(message)
+
+    def critical(self, message):
+        self.logger.critical(message)
 
 
 @dataclass
@@ -37,7 +79,7 @@ def initialize_firebase_database(config_path: str):
 def save_to_firestore(database, sensor_data: SensorData):
     doc_reference = database.collection('sensor_readings').document()
     doc_reference.set(asdict(sensor_data))
-    print(f"Data saved to Firestore: {doc_reference.id} - {sensor_data}")
+    Logger().info(f"Data saved to Firestore: {doc_reference.id} - {sensor_data}")
 
 
 def read_serial_data(serial_port: str) -> SensorData:
@@ -55,15 +97,15 @@ def read_serial_data(serial_port: str) -> SensorData:
                 json_data = json.loads(data)
                 return SensorData.from_json(json_data)
             else:
-                print(f"No data available yet. Will retry in {read_backoff_in_seconds} seconds...")
+                Logger().info(f"No data available yet. Will retry in {read_backoff_in_seconds} seconds...")
                 time.sleep(read_backoff_in_seconds)
 
-        print("Error: No data received after 3 attempts")
+        Logger().error("Error: No data received after 3 attempts")
 
     except json.JSONDecodeError:
-        print("Error: Invalid JSON data received")
+        Logger().error("Error: Invalid JSON data received")
     except serial.SerialException:
-        print("Error: Unable to read from serial port")
+        Logger().error("Error: Unable to read from serial port")
     finally:
         serial_connection.close()
 
@@ -74,7 +116,7 @@ def run_scheduled_task(serial_port: str, database):
     if sensor_data:
         save_to_firestore(database, sensor_data)
     else:
-        print("Task failed. Rescheduling to run again in 1 minute.")
+        Logger().info("Task failed. Rescheduling to run again in 1 minute.")
         schedule.every(1).minutes.do(retry_scheduled_task, serial_port, database).tag("retry")
 
 
@@ -82,15 +124,24 @@ def retry_scheduled_task(serial_port: str, database):
     sensor_data = read_serial_data(serial_port)
 
     if sensor_data:
-        print("Retry successful. Resuming normal schedule.")
+        Logger().info("Retry successful. Resuming normal schedule.")
         schedule.clear("retry")
 
         save_to_firestore(database, sensor_data)
     else:
-        print("Retry failed. Will try again in 1 minute.")
+        Logger.info("Retry failed. Will try again in 1 minute.")
+
+
+def init_logger() -> Logger:
+    log_directory = Path("logs")
+    log_directory.mkdir(parents=True, exist_ok=True)
+
+    return Logger(log_directory=log_directory.absolute().as_posix())
 
 
 def main(serial_port: str, firebase_config: str):
+    init_logger()
+
     database = initialize_firebase_database(firebase_config)
 
     # Read the data every 15 minutes
