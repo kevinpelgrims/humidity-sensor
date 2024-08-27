@@ -82,7 +82,7 @@ def save_to_firestore(database, sensor_data: SensorData):
     Logger().info(f"Data saved to Firestore: {doc_reference.id} - {sensor_data}")
 
 
-def read_serial_data(serial_port: str) -> SensorData:
+def read_serial_data(serial_port: str) -> SensorData | None:
     # Configure the serial connection
     # We open and close it every 15 minutes so that we don't block any other processes from accessing the serial port.
     serial_connection = serial.Serial(f'/dev/{serial_port}', 9600, timeout=1)
@@ -109,6 +109,8 @@ def read_serial_data(serial_port: str) -> SensorData:
     finally:
         serial_connection.close()
 
+    return None
+
 
 def run_scheduled_task(serial_port: str, database):
     sensor_data = read_serial_data(serial_port)
@@ -129,7 +131,7 @@ def retry_scheduled_task(serial_port: str, database):
 
         save_to_firestore(database, sensor_data)
     else:
-        Logger.info("Retry failed. Will try again in 1 minute.")
+        Logger().info("Retry failed. Will try again in 1 minute.")
 
 
 def init_logger() -> Logger:
