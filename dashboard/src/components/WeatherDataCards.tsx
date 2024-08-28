@@ -1,7 +1,7 @@
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {CloudRain, CloudSun, Thermometer, Wind} from "lucide-react";
 
-function WeatherData() {
+function WeatherDataCards() {
   return (
     <>
       <h2 className="text-2xl font-semibold mb-4">Weather Data</h2>
@@ -59,4 +59,4 @@ function WeatherData() {
   )
 }
 
-export default WeatherData
+export default WeatherDataCards
