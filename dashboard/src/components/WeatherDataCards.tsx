@@ -1,7 +1,12 @@
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {CloudRain, CloudSun, Thermometer, Wind} from "lucide-react";
+import {WeatherData} from "@/models";
 
-function WeatherDataCards() {
+interface WeatherDataCardsProps {
+  weatherData?: WeatherData | null
+}
+
+function WeatherDataCards({weatherData}: WeatherDataCardsProps) {
   return (
     <>
       <h2 className="text-2xl font-semibold mb-4">Weather Data</h2>
@@ -9,48 +14,48 @@ function WeatherDataCards() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium flex items-center justify-center">
-              <CloudSun className="h-4 w-4 mr-1" />
+              <CloudSun className="h-4 w-4 mr-1"/>
               Conditions
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Mainly clear</div>
-            <p className="text-xs">2024-08-25 20:00:00</p>
+            <div className="text-2xl font-bold">{weatherData?.weatherDescription}</div>
+            <p className="text-xs">{weatherData?.timestamp.toISOString()}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium flex items-center justify-center">
-              <CloudRain className="h-4 w-4 mr-1" />
+              <CloudRain className="h-4 w-4 mr-1"/>
               Precipitation
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2 mm</div>
-            <p className="text-xs">Moderate</p>
+            <div className="text-2xl font-bold">{weatherData?.precipitation} mm</div>
+            <p className="text-xs">{weatherData?.precipitationSeverity}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium flex items-center justify-center">
-              <Thermometer className="h-4 w-4 mr-1" />
+              <Thermometer className="h-4 w-4 mr-1"/>
               Temperature
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">19.9°C</div>
-            <p className="text-xs">2024-08-25 20:00:00</p>
+            <div className="text-2xl font-bold">{weatherData?.temperature.toFixed(1)}°C</div>
+            <p className="text-xs">{weatherData?.timestamp.toISOString()}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium flex items-center justify-center">
-              <Wind className="h-4 w-4 mr-1" />
+              <Wind className="h-4 w-4 mr-1"/>
               Wind
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15.8 km/h</div>
+            <div className="text-2xl font-bold">{weatherData?.windSpeed.toFixed(1)} km/h</div>
             <p className="text-xs">Wind speed</p>
           </CardContent>
         </Card>

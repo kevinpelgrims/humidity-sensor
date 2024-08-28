@@ -1,7 +1,7 @@
 import './App.css'
 import SensorDataCards from "@/components/SensorDataCards.tsx";
 import WeatherDataCards from "@/components/WeatherDataCards.tsx";
-import {SensorData} from "@/models";
+import {SensorData, WeatherData} from "@/models";
 import {initializeApp} from "firebase/app";
 import {collection, getDocs, getFirestore, limit, orderBy, query} from "firebase/firestore";
 import {useEffect, useState} from "react";
@@ -19,6 +19,7 @@ function App() {
   // TODO: We don't need to know about Firestore here, so let's refactor this at some point
 
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
 
   const fetchSensorData = async () => {
     const sensorReadingsCollection = collection(firestore, "sensor_readings");
@@ -28,20 +29,42 @@ function App() {
       const data = doc.data();
       const sensorData = new SensorData(data.timestamp.toDate(), data.temperature, data.humidity);
 
-      console.log(sensorData);
-
       setSensorData(sensorData);
     })
   };
+
+  const fetchWeatherData = async () => {
+    const weatherRecordsCollection = collection(firestore, "weather_records");
+    const weatherRecordsQuery = query(weatherRecordsCollection, orderBy("time", "desc"), limit(1));
+    const weatherRecordsSnapshot = await getDocs(weatherRecordsQuery);
+    weatherRecordsSnapshot.forEach((doc) => {
+      const data = doc.data();
+      const weatherData = new WeatherData(
+        data.precipitation,
+        data.precipitationSeverity,
+        data.rain,
+        data.showers,
+        data.temperature,
+        data.time.toDate(),
+        data.weatherCode,
+        data.weatherDescription,
+        data.windSpeed
+      );
+
+      setWeatherData(weatherData);
+    })
+  };
+
   useEffect(() => {
     fetchSensorData();
+    fetchWeatherData();
   }, [])
 
   return (
     <div className="p-4 space-y-8">
       <h1 className="text-3xl font-bold mb-4">Humidity Dashboard</h1>
       <SensorDataCards sensorData={sensorData} />
-      <WeatherDataCards />
+      <WeatherDataCards weatherData={weatherData} />
     </div>
   )
 }
