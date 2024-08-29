@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <!-- Background circle -->
+    <circle cx="50" cy="50" r="45" fill="#f0f0f0" />
+
+    <!-- Humidity representation (water droplet) -->
+    <path d="M50 20 C50 20 20 50 20 70 A30 30 0 0 0 80 70 C80 50 50 20 50 20Z" fill="#4a90e2" />
+
+    <!-- Precipitation representation (rain drop) -->
+    <path d="M75 55 L80 65 L70 65 Z" fill="#82ca9d" />
+
+    <!-- Chart-like element -->
+    <polyline points="25,80 40,60 55,70 70,50" stroke="#333" stroke-width="3" fill="none" />
+</svg>
