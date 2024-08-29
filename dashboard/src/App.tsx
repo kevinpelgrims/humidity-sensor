@@ -21,25 +21,25 @@ function App() {
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
 
-  const fetchSensorData = async () => {
+  const fetchSensorData = async (maximumRecords: number): Promise<SensorData[]> => {
     const sensorReadingsCollection = collection(firestore, "sensor_readings");
-    const sensorReadingsQuery = query(sensorReadingsCollection, orderBy("timestamp", "desc"), limit(1));
+    const sensorReadingsQuery = query(sensorReadingsCollection, orderBy("timestamp", "desc"), limit(maximumRecords));
     const sensorReadingsSnapshot = await getDocs(sensorReadingsQuery);
-    sensorReadingsSnapshot.forEach((doc) => {
-      const data = doc.data();
-      const sensorData = new SensorData(data.timestamp.toDate(), data.temperature, data.humidity);
 
-      setSensorData(sensorData);
-    })
+    return sensorReadingsSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return new SensorData(data.timestamp.toDate(), data.temperature, data.humidity);
+    });
   };
 
-  const fetchWeatherData = async () => {
+  const fetchWeatherData = async (maximumRecords: number): Promise<WeatherData[]> => {
     const weatherRecordsCollection = collection(firestore, "weather_records");
-    const weatherRecordsQuery = query(weatherRecordsCollection, orderBy("time", "desc"), limit(1));
+    const weatherRecordsQuery = query(weatherRecordsCollection, orderBy("time", "desc"), limit(maximumRecords));
     const weatherRecordsSnapshot = await getDocs(weatherRecordsQuery);
-    weatherRecordsSnapshot.forEach((doc) => {
+
+    return weatherRecordsSnapshot.docs.map((doc) => {
       const data = doc.data();
-      const weatherData = new WeatherData(
+      return new WeatherData(
         data.precipitation,
         data.precipitationSeverity,
         data.rain,
@@ -50,14 +50,26 @@ function App() {
         data.weatherDescription,
         data.windSpeed
       );
-
-      setWeatherData(weatherData);
-    })
+    });
   };
 
+  const updateSensorData = async (): Promise<void> => {
+    const sensorDataArray = await fetchSensorData(1);
+    if (sensorDataArray.length > 0) {
+      setSensorData(sensorDataArray[0]);
+    }
+  }
+
+  const updateWeatherData = async (): Promise<void> => {
+    const weatherDataArray = await fetchWeatherData(1);
+    if (weatherDataArray.length > 0) {
+      setWeatherData(weatherDataArray[0]);
+    }
+  }
+
   useEffect(() => {
-    fetchSensorData();
-    fetchWeatherData();
+    updateSensorData();
+    updateWeatherData();
   }, [])
 
   return (
