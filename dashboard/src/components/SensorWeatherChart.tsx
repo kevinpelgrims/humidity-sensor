@@ -1,5 +1,6 @@
 import {ChartData} from "@/models";
-import {Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import moment from "moment";
+import {Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis} from "recharts";
 
 interface SensorWeatherChartProps {
   data?: ChartData[] | null;
@@ -13,11 +14,9 @@ function SensorWeatherChart({data}: SensorWeatherChartProps) {
         <ResponsiveContainer width="100%" height={400}>
           <ComposedChart data={data}>
             <CartesianGrid strokeDasharray="3 3"/>
-            <XAxis dataKey="timestamp" tickFormatter={(timestamp) => new Date(timestamp).toLocaleDateString()}/>
-            <YAxis yAxisId="left" label={{value: 'Humidity (%)', angle: -90, position: 'insideLeft'}}/>
-            <YAxis yAxisId="right" label={{value: 'Precipitation (mm)', angle: 90, position: 'insideRight'}}/>
+            <XAxis dataKey="timestamp" tickFormatter={(timestamp) => moment(timestamp).format("HH:mm")}/>
             <Tooltip
-              labelFormatter={(value) => new Date(value).toLocaleDateString()}
+              labelFormatter={(value) =>  moment(value).format("DD/MM HH:mm:ss")}
               formatter={(value, name) => [value, name === 'humidity' ? 'Humidity (%)' : 'Precipitation (mm)']}
             />
             <Legend/>
