@@ -21,8 +21,8 @@ function SensorWeatherChart({data}: SensorWeatherChartProps) {
               formatter={(value, name) => [value, name === 'humidity' ? 'Humidity (%)' : 'Precipitation (mm)']}
             />
             <Legend/>
-            <Line yAxisId="left" type="monotone" dataKey="humidity" stroke="#8884d8" name="humidity"/>
             <Bar yAxisId="right" dataKey="precipitation" fill="#82ca9d" name="Precipitation"/>
+            <Line yAxisId="left" type="monotone" dataKey="humidity" stroke="#8884d8" name="humidity"/>
           </ComposedChart>
         </ResponsiveContainer>
       </>
