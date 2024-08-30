@@ -2,8 +2,8 @@ import {initializeApp} from "firebase-admin/app";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
-import {getEmailRecipients, getHumidityThreshold} from "./humidity_helper.js";
-import {getPrecipitationSeverity, getWeatherDescription, WeatherApiResponse, WeatherRecord} from "./weather_helper.js";
+import {getEmailRecipients, getHumidityThreshold} from "./humidityHelper.js";
+import {getPrecipitationSeverity, getWeatherDescription, WeatherApiResponse, WeatherRecord} from "./weatherHelper.js";
 
 initializeApp();
 const database = getFirestore();
