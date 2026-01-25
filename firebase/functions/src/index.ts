@@ -1,9 +1,13 @@
 import {initializeApp} from "firebase-admin/app";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
+import {defineString} from "firebase-functions/params";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 import {getEmailRecipients, getHumidityThreshold} from "./humidityHelper.js";
 import {getPrecipitationSeverity, getWeatherDescription, WeatherApiResponse, WeatherRecord} from "./weatherHelper.js";
+
+const latitude = defineString("LOCATION_LATITUDE");
+const longitude = defineString("LOCATION_LONGITUDE");
 
 initializeApp();
 const database = getFirestore();
@@ -12,11 +16,8 @@ export const fetchWeatherConditions = onDocumentCreated(
   "sensor_readings/{docId}",
   async () => {
     try {
-      const latitude = 55.68;
-      const longitude = 12.49;
-
       // eslint-disable-next-line max-len
-      const weatherApiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,rain,showers,weather_code,wind_speed_10m`;
+      const weatherApiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude.value()}&longitude=${longitude.value()}&current=temperature_2m,precipitation,rain,showers,weather_code,wind_speed_10m`;
 
       const response = await fetch(weatherApiUrl);
       const weatherData: WeatherApiResponse = await response.json();

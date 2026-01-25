@@ -71,6 +71,12 @@ Two Cloud Functions triggered when new sensor readings are created:
 - **fetchWeatherConditions**: Fetches current weather data from the Open-Meteo API and stores it in Firestore
 - **sendHumidityAlert**: Sends email alerts when humidity exceeds a configurable threshold (default: 70%)
 
+```bash
+# Configure your location for weather data
+cp .env.example .env.local
+# Edit .env.local with your latitude/longitude
+```
+
 ### Dashboard (`dashboard/`)
 React dashboard built with Vite and Tailwind CSS that displays:
 - Current sensor readings (humidity, temperature)
