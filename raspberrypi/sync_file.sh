@@ -1,9 +1,15 @@
 #!/bin/bash
 
-LOCAL_FILE="./process_data.py"
-REMOTE_USER="kevin"
-REMOTE_HOST="raspberrypi.local"
-REMOTE_PATH="/home/kevin/Projects/humidity-sensor/raspberrypi"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ ! -f "$SCRIPT_DIR/.env" ]; then
+    echo "Error: .env file not found. Copy .env.example to .env and configure it."
+    exit 1
+fi
+
+source "$SCRIPT_DIR/.env"
+
+LOCAL_FILE="$SCRIPT_DIR/process_data.py"
 
 fswatch -0 "$LOCAL_FILE" | while read -d "" event
 do

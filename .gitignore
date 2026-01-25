@@ -1,6 +1,9 @@
 # Python
 .venv/
 
+# Environment variables
+.env
+
 # IDE
 .idea
 *.iml

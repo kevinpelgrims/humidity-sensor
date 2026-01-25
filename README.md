@@ -54,6 +54,18 @@ python process_data.py <serial_port> <firebase_config_path>
 # Example: python process_data.py ttyACM0 path/to/firebase_config.json
 ```
 
+#### Development sync
+A helper script `sync_file.sh` uses `fswatch` and `rsync` to automatically sync code changes to your Raspberry Pi during development.
+
+```bash
+# Configure your Raspberry Pi connection
+cp .env.example .env
+# Edit .env with your username and paths
+
+# Run the sync watcher (requires fswatch: brew install fswatch)
+./sync_file.sh
+```
+
 ### Firebase Functions (`firebase/functions/`)
 Two Cloud Functions triggered when new sensor readings are created:
 - **fetchWeatherConditions**: Fetches current weather data from the Open-Meteo API and stores it in Firestore
